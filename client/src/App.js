@@ -5,7 +5,7 @@ import Home from "./pages/Home";
 import "./App.css";
 import AddEdit from "./pages/AddEdit";
 import Uploaimg from "./pages/Uploaimg";
-
+import Animation from "./pages/Animation/Animation";
 
 function App() {
   return (
@@ -20,8 +20,7 @@ function App() {
         </div>
       </BrowserRouter> */}
 
-
-      <Uploaimg/>
+   <Animation/>
     </>
   );
 }
