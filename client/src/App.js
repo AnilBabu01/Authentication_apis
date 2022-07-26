@@ -6,6 +6,7 @@ import "./App.css";
 import AddEdit from "./pages/AddEdit";
 import Uploaimg from "./pages/Uploaimg";
 import Animation from "./pages/Animation/Animation";
+import Login from "./pages/Login";
 
 function App() {
   return (
@@ -19,8 +20,9 @@ function App() {
            </Routes>
         </div>
       </BrowserRouter> */}
+      <Login/>
 
-   <Animation/>
+   {/* <Animation/> */}
     </>
   );
 }

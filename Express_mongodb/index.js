@@ -1,6 +1,6 @@
 const connectoMongo = require("./config/db");
-connectoMongo();
 const express = require('express');
+connectoMongo();
 const cors = require('cors')
 const app = express();
 const port = 8080;

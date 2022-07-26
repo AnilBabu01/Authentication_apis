@@ -1,34 +1,31 @@
-import React, { useState ,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 const Login = () => {
   const [data, setdata] = useState({
     email: "",
     password: "",
   });
-  const [info, setinfo] = useState({})
+  const [info, setinfo] = useState("");
   const { email, password } = data;
   const handleinput = (e) => {
     setdata({ ...data, [e.target.name]: e.target.value });
   };
- 
-  
-  useEffect(() => {
-    getuserinfo();
-   }, [])
-   axios.defaults.headers.get["Authorization"] = `Bearer ${localStorage.getItem(
+
+  axios.defaults.headers.get["Authorization"] = `Bearer ${localStorage.getItem(
     "authtoken"
   )}`;
 
- 
-  const getuserinfo = async()=>{
+  const getuserinfo = async () => {
     try {
-         const res = await axios.get("http://localhost:8080/api/auth/getuserinfo",);
-        console.log("data user loggr sr",res.data);
-        setinfo(res.data)
-      } catch (error) {}
-  }
-
-
+       const res = await axios.get("http://localhost:8080/api/auth/getuserinfo");
+      console.log("data user loggr sr", res.data);
+      setinfo(res.data);
+    } catch (error) {}
+  };
+  
+  useEffect(() => {
+    getuserinfo();
+  }, []);
   const onsubmit = async (e) => {
     e.preventDefault();
 
@@ -38,16 +35,15 @@ const Login = () => {
         password: password,
       });
       console.log(res.data.authtoken);
-      localStorage.setItem("authtoken",res.data.authtoken)
-     
+      localStorage.setItem("authtoken", res.data.authtoken);
     } catch (error) {}
   };
 
-  const logout =()=>{
+  const logout = () => {
     localStorage.removeItem("authtoken");
 
-    console.log("logout successfully")
-  }
+    console.log("logout successfully");
+  };
 
   return (
     <>
@@ -85,29 +81,29 @@ const Login = () => {
           </form>
         </div>
         <div>
-       { info && info.map((item)=>{
-        return(
+          {info && (
             <>
-                 <p>this is your city name</p>
-                 <p>{item.city}</p>
-                 <p>this is your course name</p>
-                 <p>{item.classs}</p>
-                 <p>this is your fathers name</p>
-                 <p>{item.fathersname}</p>
-                 <p>this is your state name</p>
-                 <p>{item.state}</p>
-                 
+              {info &&
+                info.map((item) => {
+                  return (
+                    <>
+                      <p>this is your city name</p>
+                      <p>{item.city}</p>
+                      <p>this is your course name</p>
+                      <p>{item.classs}</p>
+                      <p>this is your fathers name</p>
+                      <p>{item.fathersname}</p>
+                      <p>this is your state name</p>
+                      <p>{item.state}</p>
+                    </>
+                  );
+                })}
             </>
-        )
-       })}
-      
-      <button onClick={logout}>logout</button>
-            
-      </div>
-      </div>
+          )}
 
-
-      
+          <button onClick={logout}>logout</button>
+        </div>
+      </div>
     </>
   );
 };
