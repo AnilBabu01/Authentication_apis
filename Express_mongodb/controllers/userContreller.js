@@ -1,7 +1,8 @@
 const { json } = require("body-parser");
 const Users = require("../models/users");
 const Otp = require("../models/Otp");
-const Info = require("../models/Info");
+const Info = require("../models/info");
+const Logotp = require("../models/logotp");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
@@ -12,11 +13,32 @@ const userList = async (req, res) => {
   res.json(data);
 };
 
+const getloginotp = async (req, res) => {
+  const errors = validationResult(req);
+  const { phone } = req;
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ status: errors.array() });
+  }
+ 
+
+
+    let otpscode = Math.floor(Math.random() * 10000 + 1);
+    let otpdata = new Logotp({
+      code: otpscode,
+    });
+
+    let responce = await otpdata.save();
+
+    res.send({status:true,smg:'Opt send Successfully'});
+
+};
+
+
 const createUser = async (req, res) => {
   try {
     let profle = req.file ? req.file.path : "";
     let { name, email, phone, password } = req.body;
-    console.log(req.file);
+
     //validation result
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -26,8 +48,10 @@ const createUser = async (req, res) => {
     let user = await Users.findOne({ email });
     if (user) {
       return res.json({
-        success: "Sorry a user with this email already exists",
+        status: false,
+        smg: "Sorry a user with this email already exists",
       });
+     
     }
     //bcrypt password
     const salt = await bcrypt.genSalt(10);
@@ -51,7 +75,11 @@ const createUser = async (req, res) => {
     // res.json(user)
     //res.json({authtoken })
 
-    res.send({ success: "Register successfully", authtoken });
+    res.send({
+      status: true,
+      success: "Register successfully",
+      authtoken,
+    });
   } catch (error) {
     res.status(502).json({ success: "Internal server error" });
   }
@@ -92,11 +120,12 @@ const userLogin = async (req, res) => {
 
     const authtoken = jwt.sign(data, JWT_SECRET);
     success = true;
-    res.json({ success, authtoken });
+    res.json({ status: true, msg: "Login successfully", authtoken });
   } catch (error) {
     res.status(502).json({ success: "Internal server error" });
   }
 };
+
 const emailsend = async (req, res) => {
   let { email } = req.body;
   console.log(email);
@@ -180,7 +209,7 @@ const mamiler = async (email, otp) => {
 const userinfo = async (req, res) => {
   let profle = req.file ? req.file.path : "";
   try {
-    const { classs, city, fathersName ,state} = req.body;
+    const { classs, city, fathersName, state } = req.body;
     console.log(req.user.id, classs, city, fathersName);
 
     const userinfo = new Info({
@@ -189,7 +218,7 @@ const userinfo = async (req, res) => {
       city: city,
       filePath: profle,
       fathersName: fathersName,
-      state:state,
+      state: state,
     });
     const userinformation = await userinfo.save();
 
@@ -213,4 +242,5 @@ module.exports = {
   resetpassword,
   userinfo,
   getuserinf,
+  getloginotp,
 };

@@ -3,19 +3,19 @@ import axios from "axios";
 import Login from './Login'
 const Uploaimg = () => {
   const [data, setdata] = useState({
-    classs: "",
-    city: "",
-    fathersname: "",
-    state: "",
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
   });
 
  
   const [profilepic, setprofilepic] = useState("");
-  const { classs, city, fathersname, state } = data;
+  const { name,email,phone,password } = data;
   const handleinput = (e) => {
     setdata({ ...data, [e.target.name]: e.target.value });
   };
- console.log(info)
+
   const uploadimg = (e) => {
     console.log("aaaaa", e.target.files[0]);
     setprofilepic(e.target.files[0]);
@@ -35,14 +35,14 @@ const Uploaimg = () => {
     try {
       const formdata = new FormData();
       formdata.append("myFile", profilepic, profilepic.name);
-      formdata.append("classs", classs);
-      formdata.append("city", city);
-      formdata.append("fathersname", fathersname);
-      formdata.append("state", state);
+      formdata.append("name", name);
+      formdata.append("email", email);
+      formdata.append("phone", phone);
+      formdata.append("password", password);
       console.log(formdata);
 
       const res = await axios.post(
-        "http://localhost:8080/api/auth/info",
+        "http://localhost:8080/api/auth/register",
         formdata
       );
       console.log(res);
@@ -62,41 +62,41 @@ const Uploaimg = () => {
           <h2>uxpload your profile image using multer</h2>
 
           <form style={{ width: "200px" }} onSubmit={onsubmit}>
-            <label htmlFor="classs">enter your class</label>
+            <label htmlFor="classs">enter your name</label>
             <input
               type="text"
               id="classs"
-              name="classs"
-              placeholder="Enter your class ..."
-              value={classs}
+              name="name"
+              placeholder="Enter your name ..."
+              value={name}
               onChange={handleinput}
             />
-            <label htmlFor="city">Enter your city</label>
+            <label htmlFor="city">Enter your email</label>
             <input
               type="text"
               id="city"
-              name="city"
-              placeholder="Enter your city ..."
-              value={city}
+              name="email"
+              placeholder="Enter your email ..."
+              value={email}
               onChange={handleinput}
             />
-            <label htmlFor="phone">Enter father's name</label>
+            <label htmlFor="phone">Enter your phone</label>
             <input
               type="text"
               id="fathersname"
-              name="fathersname"
-              placeholder="Enter your father's name..."
-              value={fathersname}
+              name="phone"
+              placeholder="Enter your phone..."
+              value={phone}
               onChange={handleinput}
             />
 
-            <label htmlFor="state">Enter your status</label>
+            <label htmlFor="state">Enter your password</label>
             <input
               type="text"
               id="state"
-              name="state"
+              name="password"
               placeholder="Enter your password ..."
-              value={state}
+              value={password}
               onChange={handleinput}
             />
 

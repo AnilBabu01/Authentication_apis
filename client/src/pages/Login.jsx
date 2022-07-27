@@ -35,7 +35,7 @@ const Login = () => {
         password: password,
       });
       console.log(res.data.authtoken);
-      localStorage.setItem("authtoken", res.data.authtoken);
+      localStorage.setItem("authtoken", res);
     } catch (error) {}
   };
 

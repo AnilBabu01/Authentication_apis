@@ -20,7 +20,7 @@ function App() {
            </Routes>
         </div>
       </BrowserRouter> */}
-      <Login/>
+         <Uploaimg />
 
    {/* <Animation/> */}
     </>
