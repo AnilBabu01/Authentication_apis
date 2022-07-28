@@ -38,8 +38,23 @@ router.get("/users", userCtrl.userList);
 
 router.post(
   "/getotp",
-  [body("phone", "Please Enter more than 10 digits").isLength({ min: 10 })],
+  [body("number", "Please Enter more than 10 digits").isLength({ min: 10 })],
   userCtrl.getloginotp
+);
+
+router.post(
+  "/register",
+  [
+    body("otp", "Enter a valid otp").isLength({ min: 4 }),
+    body("name", "Enter your name").isLength({ min: 4 }),
+    body("email", "Enter a valid email").isEmail(),
+    body("number", "phone must be atleast 10 digits").isLength({ min: 10 }),
+    body("password", "Password must be atleast 5 characters").isLength({
+      min: 5,
+    }),
+  
+  ],
+  userCtrl.register
 );
 
 router.post(

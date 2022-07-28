@@ -1,6 +1,7 @@
 const { json } = require("body-parser");
 const Users = require("../models/users");
-const Otp = require("../models/Otp");
+const User = require("../models/user");
+const Otp = require("../models/otp");
 const Info = require("../models/info");
 const Logotp = require("../models/logotp");
 const { validationResult } = require("express-validator");
@@ -15,25 +16,67 @@ const userList = async (req, res) => {
 
 const getloginotp = async (req, res) => {
   const errors = validationResult(req);
-  const { phone } = req;
   if (!errors.isEmpty()) {
     return res.status(400).json({ status: errors.array() });
   }
- 
-
-
-    let otpscode = Math.floor(Math.random() * 10000 + 1);
-    let otpdata = new Logotp({
-      code: otpscode,
-    });
-
-    let responce = await otpdata.save();
-
-    res.send({status:true,smg:'Opt send Successfully'});
-
+  const number = parseInt(req.body.number);
+  console.log(number);
+  console.log(typeof number);
+  try {
+    if (number) {
+      const user = await Users.findOne({
+        phone: req.body.number,
+      });
+      if (user) {
+        res.status(400).send("User Already Exists");
+      } else {
+        let otpscode = Math.floor(Math.random() * 10000 + 1);
+        console.log(otpscode);
+        //const number = req.body.number;
+        const OTP = new Otp({ number: number, otp: otpscode });
+        const result = await OTP.save();
+        return res.status(200).send("Otp sent successfully");
+      }
+    } else {
+      res.json({ message: "Please Enter a valid number" });
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-
+const register = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const number = Number(req.body.number);
+    const otpHolder = await Otp.find({
+      number: number,
+    });
+   
+    const latestOtp =  otpHolder[otpHolder.length - 1].otp;
+    console.log(latestOtp,req.body.otp)
+    if (req.body.otp === latestOtp) {
+      const user = new User({ number, name, email, password });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      const result = await user.save();
+      const deleteMany = await Otp.deleteMany({
+        number: req.body.number,
+      });
+      return res.status(200).send({
+        message: "Register Successfully",
+        token: token,
+        data: user,
+        ok: true,
+      });
+    } else {
+      res.json("wrong otp");
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
 const createUser = async (req, res) => {
   try {
     let profle = req.file ? req.file.path : "";
@@ -51,7 +94,6 @@ const createUser = async (req, res) => {
         status: false,
         smg: "Sorry a user with this email already exists",
       });
-     
     }
     //bcrypt password
     const salt = await bcrypt.genSalt(10);
@@ -243,4 +285,5 @@ module.exports = {
   userinfo,
   getuserinf,
   getloginotp,
+  register,
 };
