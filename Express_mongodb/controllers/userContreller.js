@@ -24,8 +24,8 @@ const getloginotp = async (req, res) => {
   console.log(typeof number);
   try {
     if (number) {
-      const user = await Users.findOne({
-        phone: req.body.number,
+      const user = await User.findOne({
+        number: req.body.number,
       });
       if (user) {
         res.status(400).send("User Already Exists");
@@ -48,30 +48,53 @@ const getloginotp = async (req, res) => {
 const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ status: errors.array() });
+    }
     const number = Number(req.body.number);
-    const otpHolder = await Otp.find({
-      number: number,
+    const otp = Number(req.body.otp);
+    const user = await User.findOne({
+      number: req.body.number,
     });
-   
-    const latestOtp =  otpHolder[otpHolder.length - 1].otp;
-    console.log(latestOtp,req.body.otp)
-    if (req.body.otp === latestOtp) {
-      const user = new User({ number, name, email, password });
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: "7d",
-      });
-      const result = await user.save();
-      const deleteMany = await Otp.deleteMany({
-        number: req.body.number,
-      });
+    if (user) {
       return res.status(200).send({
-        message: "Register Successfully",
-        token: token,
-        data: user,
-        ok: true,
+        message: "User Already exist with email or number",
+        status: false,
       });
     } else {
-      res.json("wrong otp");
+      const otpHolder = await Otp.find({
+        number,
+      });
+      console.log(otpHolder)
+      if (!otpHolder===null) {
+        const latestOtp = otpHolder[otpHolder.length - 1].otp;
+        console.log(latestOtp, otp);
+        if (otp === latestOtp) {
+          const user = new User({ number, name, email, password });
+          const result = await user.save();
+          const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+            expiresIn: "7d",
+          });
+
+          const deleteMany = await Otp.deleteMany({
+            number: req.body.number,
+          });
+          return res.status(200).send({
+            message: "Register Successfully",
+            token: token,
+            data: result,
+            status: true,
+          });
+        } else {
+          res.json("wrong otp");
+        }
+      } else {
+        return res.status(200).send({
+          message: "First send otp",
+          status: false,
+        });
+      }
     }
   } catch (err) {
     console.log(err);
