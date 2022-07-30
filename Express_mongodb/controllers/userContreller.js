@@ -2,18 +2,35 @@ const { json } = require("body-parser");
 const Users = require("../models/users");
 const User = require("../models/user");
 const Otp = require("../models/otp");
+const fast2sms = require("fast-two-sms");
 const Info = require("../models/info");
 const Logotp = require("../models/logotp");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
 const JWT_SECRET = "anilbabu$oy";
-
+const sendsms=(number,otp,res)=>{
+  
+var options = {
+  authorization: "tOBBX8p5nFDWFVixS2vJQu01EV0JWoESZ79JE3DSD87pdI4yrXuLmfCVRIxb",
+  message: otp,
+  numbers: [number],
+};
+fast2sms
+  .sendMessage(options)
+  .then((responce) => {
+    console.log(responce);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+}
+//Asynchronous Function.
 const userList = async (req, res) => {
   let data = await Users.find();
   res.json(data);
 };
-
+//this api is used to send opt for registration
 const getloginotp = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -28,10 +45,14 @@ const getloginotp = async (req, res) => {
         number: req.body.number,
       });
       if (user) {
-        res.status(400).send("User Already Exists");
+        return res.status(200).send({
+          message: "User Already exist with email or number",
+          status: false,
+        });
       } else {
         let otpscode = Math.floor(Math.random() * 10000 + 1);
         console.log(otpscode);
+        sendsms(req.body.number,otpscode,res)
         //const number = req.body.number;
         const OTP = new Otp({ number: number, otp: otpscode });
         const result = await OTP.save();
@@ -44,7 +65,7 @@ const getloginotp = async (req, res) => {
     console.log(err);
   }
 };
-
+//this register api with otp auth
 const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -66,8 +87,8 @@ const register = async (req, res) => {
       const otpHolder = await Otp.find({
         number,
       });
-      console.log(otpHolder)
-      if (!otpHolder===null) {
+      console.log(otpHolder);
+      if (otpHolder) {
         const latestOtp = otpHolder[otpHolder.length - 1].otp;
         console.log(latestOtp, otp);
         if (otp === latestOtp) {
